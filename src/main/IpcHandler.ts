@@ -1,8 +1,12 @@
-import { IpcMain, IpcMainEvent } from 'electron'
+import { IpcMain, IpcMainEvent, IpcMainInvokeEvent } from 'electron'
 import { SqlInstance } from './util/SqlBridge'
 
 interface IpcHandlers {
   [channel: string]: (event: IpcMainEvent, ...args: unknown[]) => void
+}
+
+interface IpcInvokeHandlers {
+  [channel: string]: (event: IpcMainInvokeEvent, ...args: unknown[]) => unknown
 }
 
 const ipcHandlers: IpcHandlers = {
@@ -33,10 +37,22 @@ const ipcHandlers: IpcHandlers = {
   }
 }
 
+const ipcInvokeHandlers: IpcInvokeHandlers = {
+  test: async () => {
+    return 2
+  }
+}
+
 function handleIpcRequests(ipcMain: IpcMain): void {
   Object.entries(ipcHandlers).forEach(([channel, listener]) => {
     ipcMain.on(channel, listener)
   })
 }
 
-export { handleIpcRequests }
+function handleIpcInvokeRequests(ipcMain: IpcMain): void {
+  Object.entries(ipcInvokeHandlers).forEach(([channel, listener]) => {
+    ipcMain.handle(channel, listener)
+  })
+}
+
+export { handleIpcRequests, handleIpcInvokeRequests }

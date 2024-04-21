@@ -23,11 +23,15 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.0",
     "@electron-toolkit/utils": "^3.0.0",
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
+    "@mui/icons-material": "^5.15.15",
+    "@mui/joy": "^5.0.0-beta.32",
+    "@mui/material": "^5.15.15",
     "@types/mysql": "^2.15.26",
     "electron-updater": "^6.1.7",
-    "mysql2": "^3.9.3",
-    "tdesign-icons-react": "^0.3.2",
-    "tdesign-react": "^1.5.5"
+    "less": "^4.2.0",
+    "mysql2": "^3.9.3"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^2.0.0",
