@@ -25,7 +25,9 @@
     "@electron-toolkit/utils": "^3.0.0",
     "@types/mysql": "^2.15.26",
     "electron-updater": "^6.1.7",
-    "mysql2": "^3.9.3"
+    "mysql2": "^3.9.3",
+    "tdesign-icons-react": "^0.3.2",
+    "tdesign-react": "^1.5.5"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^2.0.0",

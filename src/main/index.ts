@@ -2,7 +2,7 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import { SqlInstance } from './util/SqlBridge'
+import { handleIpcRequests } from './IpcHandler'
 
 function createWindow(): void {
   // Create the browser window.
@@ -51,30 +51,10 @@ app.whenReady().then(() => {
   })
 
   // IPC test
-  ipcMain.on('mysql', async () => {
-    const instance = new SqlInstance({
-      password: 'sty@20030209'
-    })
-    instance.setSqlListener((sql) => console.log(sql))
-    instance.connect()
-    instance.selectDatabase('dbms')
-    //console.log(await instance.queryTables())
-    const result = await instance.query({
-      table: 'test_dbms',
-      columns: ['ID', 'Comment'],
-      order: [{ field: 'ID', type: 'DESC' }],
-      conditions: [
-        {
-          field: 'ID',
-          range: { start: { value: 1 }, end: { value: 2 } }
-        },
-        {
-          field: 'Comment',
-          fuzzy: 'Test%'
-        }
-      ]
-    })
-    console.log(result)
+  handleIpcRequests(ipcMain)
+
+  ipcMain.handle('test', () => {
+    return 2
   })
 
   createWindow()

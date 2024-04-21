@@ -1,8 +1,21 @@
-import { contextBridge } from 'electron'
-import { electronAPI } from '@electron-toolkit/preload'
+import { contextBridge, ipcRenderer } from 'electron'
+import { ElectronAPI, electronAPI } from '@electron-toolkit/preload'
 
 // Custom APIs for renderer
-const api = {}
+const api = {
+  test: async (): Promise<number> => {
+    return ipcRenderer.invoke('test')
+  }
+}
+
+type CustomAPI = typeof api
+
+declare global {
+  interface Window {
+    electron: ElectronAPI
+    api: typeof api
+  }
+}
 
 // Use `contextBridge` APIs to expose Electron APIs to
 // renderer only if context isolation is enabled, otherwise
@@ -15,8 +28,8 @@ if (process.contextIsolated) {
     console.error(error)
   }
 } else {
-  // @ts-ignore (define in dts)
   window.electron = electronAPI
-  // @ts-ignore (define in dts)
   window.api = api
 }
+
+export type { CustomAPI }
