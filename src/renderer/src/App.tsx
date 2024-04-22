@@ -224,7 +224,11 @@ function App(): JSX.Element {
                           }
                         }}
                       >
-                        {column.name}
+                        <Typography
+                          sx={{ width: 100, overflow: 'hidden', textOverflow: 'ellipsis' }}
+                        >
+                          {column.name}
+                        </Typography>
                       </Link>
                     </th>
                   ))}
@@ -242,7 +246,11 @@ function App(): JSX.Element {
                     </td>
                     {columnInformation.map((column) => (
                       <td key={column.name} width={100}>
-                        <Typography>{row[column.name]}</Typography>
+                        <Typography
+                          sx={{ width: 100, overflow: 'hidden', textOverflow: 'ellipsis' }}
+                        >
+                          {row[column.name]?.toString()}
+                        </Typography>
                       </td>
                     ))}
                   </tr>
