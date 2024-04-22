@@ -1,9 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit'
 import SqlStatementReducer from './SqlStatement'
+import TableReducer from './Table'
 
 const store = configureStore({
   reducer: {
-    sqlStatementReducer: SqlStatementReducer
+    sqlStatementReducer: SqlStatementReducer,
+    tableReducer: TableReducer
   }
 })
 

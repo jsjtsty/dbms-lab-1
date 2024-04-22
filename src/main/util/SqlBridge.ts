@@ -38,6 +38,7 @@ interface ConditionOption {
   exact?: SqlPotentialType
   fuzzy?: string
   range?: ConditionRange
+  sql?: string
 }
 
 interface SqlQueryOptions {
@@ -171,7 +172,7 @@ class SqlInstance {
 
       const conditionStatements: string[] = []
       options.conditions.forEach((option: ConditionOption) => {
-        if (option.exact) {
+        if (option.exact !== undefined) {
           switch (typeof option.exact) {
             case 'string':
               conditionStatements.push(`${option.field} = '${option.exact}'`)
@@ -180,15 +181,15 @@ class SqlInstance {
               conditionStatements.push(`${option.field} = ${option.exact}`)
               break
           }
-        } else if (option.fuzzy) {
+        } else if (option.fuzzy !== undefined) {
           conditionStatements.push(`${option.field} LIKE '${option.fuzzy}'`)
-        } else if (option.range) {
-          if (option.range.start) {
+        } else if (option.range !== undefined) {
+          if (option.range.start !== undefined) {
             conditionStatements.push(
               `${option.field} ${option.range.start.included ?? true ? '>=' : '>'} ${option.range.start.value}`
             )
           }
-          if (option.range.end) {
+          if (option.range.end !== undefined) {
             conditionStatements.push(
               `${option.field} ${option.range.end.included ?? true ? '<=' : '<'} ${option.range.end.value}`
             )
@@ -235,4 +236,4 @@ class SqlInstance {
 }
 
 export { SqlInstance }
-export type { SqlColumnInformation, SqlQueryOptions }
+export type { SqlColumnInformation, SqlQueryOptions, ConditionOption }

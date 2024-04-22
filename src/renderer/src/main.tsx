@@ -10,7 +10,7 @@ import { sqlStatementActions } from './action/SqlStatement'
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <Provider store={store}>
-      <App />
+      <App database="nul_dbms_1" table="t_students" />
     </Provider>
   </React.StrictMode>
 )
