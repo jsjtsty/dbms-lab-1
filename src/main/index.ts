@@ -4,7 +4,7 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { handleIpcInvokeRequests, handleIpcRequests } from './IpcHandler'
 
-function createWindow(): void {
+function createWindow(): BrowserWindow {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 900,
@@ -36,6 +36,8 @@ function createWindow(): void {
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
+
+  return mainWindow
 }
 
 // This method will be called when Electron has finished
@@ -53,10 +55,11 @@ app.whenReady().then(() => {
   })
 
   // IPC test
-  handleIpcRequests(ipcMain)
-  handleIpcInvokeRequests(ipcMain)
 
-  createWindow()
+  const window = createWindow()
+
+  handleIpcRequests(ipcMain)
+  handleIpcInvokeRequests(ipcMain, window)
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the

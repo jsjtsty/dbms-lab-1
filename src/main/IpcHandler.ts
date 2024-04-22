@@ -1,5 +1,5 @@
 import { BrowserWindow, IpcMain, IpcMainEvent, IpcMainInvokeEvent } from 'electron'
-import { SqlColumnInformation, SqlInstance } from './util/SqlBridge'
+import { SqlColumnInformation, SqlInstance, SqlQueryOptions } from './util/SqlBridge'
 
 interface IpcHandlers {
   [channel: string]: (event: IpcMainEvent, ...args: any[]) => void
@@ -23,7 +23,7 @@ function handleIpcInvokeRequests(ipcMain: IpcMain, mainWindow: BrowserWindow): v
   const ipcInvokeHandlers: IpcInvokeHandlers = {
     open: async (_, host: string, password: string): Promise<boolean> => {
       let result: boolean = false
-      if (sqlInstance) {
+      if (!sqlInstance) {
         sqlInstance = new SqlInstance({
           host,
           password
@@ -60,7 +60,7 @@ function handleIpcInvokeRequests(ipcMain: IpcMain, mainWindow: BrowserWindow): v
       }
       return result
     },
-    query: async (_, sql: string): Promise<object[]> => {
+    query: async (_, sql: SqlQueryOptions): Promise<object[]> => {
       let result: object[] = []
       if (sqlInstance) {
         result = await sqlInstance.query(sql)

@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { ElectronAPI, electronAPI } from '@electron-toolkit/preload'
-import { SqlColumnInformation } from '../main/util/SqlBridge'
+import { SqlColumnInformation, SqlQueryOptions } from '../main/util/SqlBridge'
 
 // Custom APIs for renderer
 const api = {
@@ -16,17 +16,27 @@ const api = {
   fetchColumns: async (table: string): Promise<SqlColumnInformation[]> => {
     return ipcRenderer.invoke('fetchColumns', table)
   },
-  query: async <T>(sql: string): Promise<T[]> => {
+  query: async <T>(sql: SqlQueryOptions): Promise<T[]> => {
     return ipcRenderer.invoke('query', sql)
   }
 }
 
+const listener = {
+  onSql: (callback: (sql: string) => void): void => {
+    ipcRenderer.on('sql', (_, sql: string) => {
+      callback(sql)
+    })
+  }
+}
+
 type CustomAPI = typeof api
+type CustomListener = typeof listener
 
 declare global {
   interface Window {
     electron: ElectronAPI
-    api: typeof api
+    api: CustomAPI
+    listener: CustomListener
   }
 }
 
@@ -37,6 +47,7 @@ if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld('electron', electronAPI)
     contextBridge.exposeInMainWorld('api', api)
+    contextBridge.exposeInMainWorld('listener', listener)
   } catch (error) {
     console.error(error)
   }
@@ -45,4 +56,4 @@ if (process.contextIsolated) {
   window.api = api
 }
 
-export type { CustomAPI }
+export type { CustomAPI, CustomListener }
