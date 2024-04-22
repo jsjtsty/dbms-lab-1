@@ -102,7 +102,9 @@ function InsertFilterDialog(props: InsertFilterDialogProps): JSX.Element {
                 }}
               >
                 {columns.map((column) => (
-                  <Option value={column.name}>{column.name}</Option>
+                  <Option key={column.name} value={column.name}>
+                    {column.name}
+                  </Option>
                 ))}
               </Select>
             </FormControl>

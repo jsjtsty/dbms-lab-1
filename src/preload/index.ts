@@ -4,8 +4,8 @@ import { SqlColumnInformation, SqlQueryOptions } from '../main/util/SqlBridge'
 
 // Custom APIs for renderer
 const api = {
-  open: async (host: string, password: string): Promise<boolean> => {
-    return ipcRenderer.invoke('open', host, password)
+  open: async (host: string, port: number, user: string, password: string): Promise<boolean> => {
+    return ipcRenderer.invoke('open', host, port, user, password)
   },
   close: async (): Promise<boolean> => {
     return ipcRenderer.invoke('close')
@@ -18,6 +18,12 @@ const api = {
   },
   query: async <T>(sql: SqlQueryOptions): Promise<T[]> => {
     return ipcRenderer.invoke('query', sql)
+  },
+  fetchDatabases: async (): Promise<string[]> => {
+    return ipcRenderer.invoke('fetchDatabases')
+  },
+  fetchTables: async (): Promise<string[]> => {
+    return ipcRenderer.invoke('fetchTables')
   }
 }
 

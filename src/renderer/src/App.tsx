@@ -1,5 +1,4 @@
 import {
-  Avatar,
   Box,
   Breadcrumbs,
   Button,
@@ -14,7 +13,6 @@ import {
   Table,
   Typography
 } from '@mui/joy'
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/atom-one-light.min.css'
 import parse from 'html-react-parser'
@@ -27,14 +25,9 @@ import {
   selectColumnInformation,
   selectColumnInformationLoaded,
   selectData,
-  selectDataLoaded,
   tableActions
 } from './action/Table'
-
-interface TableViewProps {
-  database: string
-  table: string
-}
+import { ConnectSqlDialog } from './ConnectSqlDialog'
 
 const transfromConditionOption = (
   column: string,
@@ -91,9 +84,7 @@ const transfromConditionOption = (
   return result
 }
 
-function App(props: TableViewProps): JSX.Element {
-  const { database, table } = props
-
+function App(): JSX.Element {
   const dispatch = useAppDispatch()
 
   const [filters, setFilters] = React.useState<ConditionOption[]>([])
@@ -102,32 +93,21 @@ function App(props: TableViewProps): JSX.Element {
   const columnInformation = useAppSelector(selectColumnInformation)
   const columnInformationLoaded = useAppSelector(selectColumnInformationLoaded)
   const data = useAppSelector(selectData)
-  const dataLoaded = useAppSelector(selectDataLoaded)
 
   const [openInsertFilter, setOpenInsertFilter] = React.useState<boolean>(false)
-  const [test, setTest] = React.useState<boolean>(false)
-  const [test2, setTest2] = React.useState<boolean>(false)
+  const [openConnectDialog, setOpenConnectDialog] = React.useState<boolean>(true)
+  const [database, setDatabase] = React.useState<string>('')
+  const [table, setTable] = React.useState<string>('')
 
   React.useEffect(() => {
-    if (!test2) {
-      setTest2(true)
-      ;(async (): Promise<void> => {
-        await window.api.open('localhost', 'sty@20030209')
-        await window.api.selectDatabase(database)
-        setTest(true)
-      })()
-    }
-  }, [test2])
-
-  React.useEffect(() => {
-    if (!test) {
+    if (openConnectDialog) {
       return
     }
 
     if (!columnInformationLoaded) {
       dispatch(tableActions.queryColumns(table))
     }
-  }, [columnInformationLoaded, test])
+  }, [columnInformationLoaded, openConnectDialog])
 
   React.useEffect(() => {
     if (columnInformationLoaded) {
@@ -144,15 +124,9 @@ function App(props: TableViewProps): JSX.Element {
     <>
       <Box>
         <Breadcrumbs>
-          <Link color="neutral" href="/">
-            Databases
-          </Link>
-          <Link color="neutral" href="/">
-            {database}
-          </Link>
-          <Link color="neutral" href="/">
-            {table}
-          </Link>
+          <Link color="neutral">Databases</Link>
+          <Link color="neutral">{database}</Link>
+          <Link color="neutral">{table}</Link>
         </Breadcrumbs>
         <Stack
           sx={{
@@ -163,12 +137,13 @@ function App(props: TableViewProps): JSX.Element {
         >
           <FormControl>
             <FormLabel>Filters</FormLabel>
-            <Stack direction="row" spacing={1}>
+            <Stack direction="row" spacing={1} flexWrap="wrap">
               {filters.map((filter, index) => (
                 <Chip
                   variant="soft"
                   key={index}
                   color="primary"
+                  sx={{ height: 32 }}
                   endDecorator={
                     <ChipDelete
                       onDelete={() => {
@@ -227,9 +202,7 @@ function App(props: TableViewProps): JSX.Element {
               stickyHeader
               hoverRow
               sx={{
-                '--Table-headerUnderlineThickness': '1px',
-                '--TableCell-paddingY': '4px',
-                '--TableCell-paddingX': '8px'
+                '--Table-headerUnderlineThickness': '1px'
               }}
             >
               <thead style={{ background: 'red' }}>
@@ -288,6 +261,14 @@ function App(props: TableViewProps): JSX.Element {
           setOpenInsertFilter(false)
         }}
         columns={columnInformation}
+      />
+      <ConnectSqlDialog
+        open={openConnectDialog}
+        onApply={(database, table) => {
+          setDatabase(database)
+          setTable(table)
+          setOpenConnectDialog(false)
+        }}
       />
     </>
   )

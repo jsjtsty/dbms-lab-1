@@ -21,18 +21,30 @@ function handleIpcRequests(ipcMain: IpcMain): void {
 
 function handleIpcInvokeRequests(ipcMain: IpcMain, mainWindow: BrowserWindow): void {
   const ipcInvokeHandlers: IpcInvokeHandlers = {
-    open: async (_, host: string, password: string): Promise<boolean> => {
+    open: async (
+      _,
+      host: string,
+      port: number,
+      user: string,
+      password: string
+    ): Promise<boolean> => {
       let result: boolean = false
       if (!sqlInstance) {
         sqlInstance = new SqlInstance({
           host,
+          port,
+          user,
           password
         })
         sqlInstance.setSqlListener((sql: string) => {
           mainWindow.webContents.send('sql', sql)
         })
-        await sqlInstance.connect()
-        result = true
+        try {
+          await sqlInstance.connect()
+          result = true
+        } catch (e) {
+          sqlInstance = null
+        }
       }
       return result
     },
@@ -64,6 +76,20 @@ function handleIpcInvokeRequests(ipcMain: IpcMain, mainWindow: BrowserWindow): v
       let result: object[] = []
       if (sqlInstance) {
         result = await sqlInstance.query(sql)
+      }
+      return result
+    },
+    fetchDatabases: async (): Promise<string[]> => {
+      let result: string[] = []
+      if (sqlInstance) {
+        result = await sqlInstance.queryDatabases()
+      }
+      return result
+    },
+    fetchTables: async (): Promise<string[]> => {
+      let result: string[] = []
+      if (sqlInstance) {
+        result = await sqlInstance.queryTables()
       }
       return result
     }
