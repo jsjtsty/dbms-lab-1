@@ -1,10 +1,23 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { ElectronAPI, electronAPI } from '@electron-toolkit/preload'
+import { SqlColumnInformation } from '../main/util/SqlBridge'
 
 // Custom APIs for renderer
 const api = {
-  test: async (): Promise<number> => {
-    return ipcRenderer.invoke('test')
+  open: async (host: string, password: string): Promise<boolean> => {
+    return ipcRenderer.invoke('open', host, password)
+  },
+  close: async (): Promise<boolean> => {
+    return ipcRenderer.invoke('close')
+  },
+  selectDatabase: async (database: string): Promise<boolean> => {
+    return ipcRenderer.invoke('selectDatabase', database)
+  },
+  fetchColumns: async (table: string): Promise<SqlColumnInformation[]> => {
+    return ipcRenderer.invoke('fetchColumns', table)
+  },
+  query: async <T>(sql: string): Promise<T[]> => {
+    return ipcRenderer.invoke('query', sql)
   }
 }
 

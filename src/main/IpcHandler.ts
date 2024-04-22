@@ -1,55 +1,74 @@
-import { IpcMain, IpcMainEvent, IpcMainInvokeEvent } from 'electron'
-import { SqlInstance } from './util/SqlBridge'
+import { BrowserWindow, IpcMain, IpcMainEvent, IpcMainInvokeEvent } from 'electron'
+import { SqlColumnInformation, SqlInstance } from './util/SqlBridge'
 
 interface IpcHandlers {
-  [channel: string]: (event: IpcMainEvent, ...args: unknown[]) => void
+  [channel: string]: (event: IpcMainEvent, ...args: any[]) => void
 }
 
 interface IpcInvokeHandlers {
-  [channel: string]: (event: IpcMainInvokeEvent, ...args: unknown[]) => unknown
+  [channel: string]: (event: IpcMainInvokeEvent, ...args: any[]) => any
 }
 
-const ipcHandlers: IpcHandlers = {
-  mysql: async () => {
-    const instance = new SqlInstance({
-      password: 'sty@20030209'
-    })
-    instance.setSqlListener((sql) => console.log(sql))
-    instance.connect()
-    instance.selectDatabase('dbms')
-    //console.log(await instance.queryTables())
-    const result = await instance.query({
-      table: 'test_dbms',
-      columns: ['ID', 'Comment'],
-      order: [{ field: 'ID', type: 'DESC' }],
-      conditions: [
-        {
-          field: 'ID',
-          range: { start: { value: 1 }, end: { value: 2 } }
-        },
-        {
-          field: 'Comment',
-          fuzzy: 'Test%'
-        }
-      ]
-    })
-    console.log(result)
-  }
-}
-
-const ipcInvokeHandlers: IpcInvokeHandlers = {
-  test: async () => {
-    return 2
-  }
-}
+let sqlInstance: SqlInstance | null = null
 
 function handleIpcRequests(ipcMain: IpcMain): void {
+  const ipcHandlers: IpcHandlers = {}
+
   Object.entries(ipcHandlers).forEach(([channel, listener]) => {
     ipcMain.on(channel, listener)
   })
 }
 
-function handleIpcInvokeRequests(ipcMain: IpcMain): void {
+function handleIpcInvokeRequests(ipcMain: IpcMain, mainWindow: BrowserWindow): void {
+  const ipcInvokeHandlers: IpcInvokeHandlers = {
+    open: async (_, host: string, password: string): Promise<boolean> => {
+      let result: boolean = false
+      if (sqlInstance) {
+        sqlInstance = new SqlInstance({
+          host,
+          password
+        })
+        sqlInstance.setSqlListener((sql: string) => {
+          mainWindow.webContents.send('sql', sql)
+        })
+        await sqlInstance.connect()
+        result = true
+      }
+      return result
+    },
+    close: async (): Promise<boolean> => {
+      let result: boolean = false
+      if (sqlInstance) {
+        await sqlInstance.close()
+        sqlInstance = null
+        result = true
+      }
+      return result
+    },
+    selectDatabase: async (_, database: string): Promise<boolean> => {
+      let result: boolean = false
+      if (sqlInstance) {
+        await sqlInstance.selectDatabase(database)
+        result = true
+      }
+      return result
+    },
+    fetchColumns: async (_, table: string): Promise<SqlColumnInformation[]> => {
+      let result: SqlColumnInformation[] = []
+      if (sqlInstance) {
+        result = await sqlInstance.queryTableStructure(table)
+      }
+      return result
+    },
+    query: async (_, sql: string): Promise<object[]> => {
+      let result: object[] = []
+      if (sqlInstance) {
+        result = await sqlInstance.query(sql)
+      }
+      return result
+    }
+  }
+
   Object.entries(ipcInvokeHandlers).forEach(([channel, listener]) => {
     ipcMain.handle(channel, listener)
   })

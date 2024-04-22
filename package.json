@@ -30,6 +30,8 @@
     "@mui/material": "^5.15.15",
     "@types/mysql": "^2.15.26",
     "electron-updater": "^6.1.7",
+    "highlight.js": "^11.9.0",
+    "html-react-parser": "^5.1.10",
     "less": "^4.2.0",
     "mysql2": "^3.9.3"
   },

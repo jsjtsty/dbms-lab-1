@@ -12,13 +12,18 @@ import {
   Sheet,
   Stack,
   Table,
-  Textarea,
   Typography
 } from '@mui/joy'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
+import hljs from 'highlight.js'
+import 'highlight.js/styles/atom-one-light.min.css'
+import parse from 'html-react-parser'
+import React from 'react'
 
 function App(): JSX.Element {
   const chips = ['Age ~ [20, 40]', 'Department ~ 213710%', 'Class = 2137101']
+
+  const [sqlStatement, setSqlStatement] = React.useState<string>('')
 
   return (
     <Box>
@@ -48,7 +53,9 @@ function App(): JSX.Element {
                 variant="soft"
                 key={index}
                 color="primary"
-                endDecorator={<ChipDelete onDelete={() => alert('Delete')} />}
+                endDecorator={
+                  <ChipDelete onDelete={() => setSqlStatement('select * from ladders;')} />
+                }
               >
                 {chip}
               </Chip>
@@ -74,12 +81,12 @@ function App(): JSX.Element {
               borderRadius: 'sm',
               height: 80,
               boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
-              padding: '5px 10px',
-              fontFamily: 'Courier New'
+              padding: '5px 10px'
             }}
           >
-            <span style={{ color: 'blue' }}>select</span> *{' '}
-            <span style={{ color: 'blue' }}>from</span> ladders;
+            <Typography fontFamily="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace">
+              {parse(hljs.highlight(sqlStatement, { language: 'sql' }).value)}
+            </Typography>
           </Sheet>
         </FormControl>
         <Sheet
